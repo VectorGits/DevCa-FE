@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import Celestial from './components/Celestial.vue'
 import CloudBank from './components/CloudBank.vue'
+import { useTheme } from './composables/useTheme'
 
-// Placeholder theme state - the real switch (sun / moon) comes later.
-const isDark = ref(true)
-
-function toggleTheme() {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
+const { isDark, toggleTheme } = useTheme()
 </script>
 
 <template>
   <main class="sky relative min-h-svh overflow-hidden">
+    <Celestial />
     <CloudBank />
 
     <div class="relative z-30 flex min-h-svh flex-col items-center justify-center gap-8 px-6 text-center">

@@ -1,11 +1,24 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Dev Career Frontend Channel — Vue single page challenge." />
     <title>Dev Career Frontend Channel</title>
+    <script>
+      // Runs before first paint so the right theme is on <html> with no flash.
+      ;(() => {
+        try {
+          const stored = localStorage.getItem('devca-theme')
+          const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
+          const dark = stored ? stored === 'dark' : !prefersLight
+          document.documentElement.classList.toggle('dark', dark)
+        } catch {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

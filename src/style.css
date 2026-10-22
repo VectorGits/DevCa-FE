@@ -23,7 +23,9 @@
 
 /* Sky behind the cloud bank. Re-tone the whole scene from these stops. */
 .sky {
-  background: linear-gradient(180deg, #fdf8f1 0%, #eff2ff 58%, #dbe1f9 100%);
+  background:
+    radial-gradient(70% 55% at 86% 10%, rgb(255 196 90 / 0.22) 0%, rgb(255 196 90 / 0) 62%),
+    linear-gradient(180deg, #fdf8f1 0%, #eff2ff 58%, #dbe1f9 100%);
 }
 
 html.dark .sky {
