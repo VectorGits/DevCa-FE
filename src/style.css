@@ -20,3 +20,41 @@
     min-height: 100svh;
   }
 }
+
+/* Sky behind the cloud bank. Re-tone the whole scene from these stops. */
+.sky {
+  background: linear-gradient(180deg, #fdf8f1 0%, #eff2ff 58%, #dbe1f9 100%);
+}
+
+html.dark .sky {
+  background: radial-gradient(125% 85% at 78% 4%, #241a44 0%, #0d0b18 42%, #050409 100%);
+}
+
+/* Cloud layer theming. Each layer sets --top-light / --base-light / --top-dark /
+   --base-dark inline (see CloudBank.vue); these globals pick the pair per theme.
+   Kept out of the component's <style scoped> because a scoped :global(html.dark)
+   rule gets dropped by the SFC compiler. */
+.cloud-layer {
+  --top: var(--top-light);
+  --base: var(--base-light);
+  --rim: rgba(255, 255, 255, 0.55);
+}
+
+html.dark .cloud-layer {
+  --top: var(--top-dark);
+  --base: var(--base-dark);
+  --rim: rgba(196, 174, 255, 0.3);
+}
+
+.stop-top {
+  stop-color: var(--top);
+}
+
+.stop-base {
+  stop-color: var(--base);
+}
+
+/* hairline crest light on each bank */
+.cloud-rim {
+  stroke: var(--rim);
+}
