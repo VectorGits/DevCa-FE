@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+/* Class-based dark mode: `dark:` utilities follow the .dark class on <html>,
+   so the in-page toggle controls the theme instead of the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app {
+    min-height: 100svh;
+  }
+}
