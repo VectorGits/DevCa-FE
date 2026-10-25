@@ -4,6 +4,15 @@
    so the in-page toggle controls the theme instead of the OS setting. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ── Custom "Cloudy" display font ─────────────────────────────────────── */
+@font-face {
+  font-family: 'Cloudy';
+  src: url('./assets/Cloudy-0W244.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
@@ -14,6 +23,15 @@
     min-height: 100svh;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Apply Cloudy to all major typographic elements */
+  h1, h2, h3 {
+    font-family: 'Cloudy', var(--font-sans);
+  }
+
+  button {
+    font-family: 'Cloudy', var(--font-sans);
   }
 
   #app {

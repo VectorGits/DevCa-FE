@@ -13,7 +13,7 @@ const CORE = '#ffc02e'
 const DISCS = TONES.map((tone, i) => ({ tone, id: `sun-tone-${i}` }))
 
 /** seconds between new discs */
-const STEP = 1.2
+const STEP = 5
 /** how long a single disc takes to grow and fade */
 const GROW = STEP
 

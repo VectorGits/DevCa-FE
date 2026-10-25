@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { CLOUD_PATH, CLOUD_VIEWBOX } from '../assets/cloud-path'
+import { useParallax } from '../composables/useParallax'
 
 /**
  * One entry per cloud bank. `index` 0 is the front-most bank (sits on the
@@ -23,7 +25,13 @@ interface CloudLayer {
   flip: boolean
   /** px of softening; the further back a bank sits the hazier it gets */
   blur: number
+  /** initial drift direction: -1 = left first, 1 = right first */
+  driftDir: number
+  /** full cycle duration in seconds */
+  driftDuration: number
 }
+
+const DRIFT_RANGE = 65 // px of horizontal travel in each direction
 
 const layers: CloudLayer[] = [
   {
@@ -35,6 +43,8 @@ const layers: CloudLayer[] = [
     zoom: 1,
     flip: false,
     blur: 0,
+    driftDir: -1,
+    driftDuration: 9,
   },
   {
     id: 'near',
@@ -45,6 +55,8 @@ const layers: CloudLayer[] = [
     zoom: 1.05,
     flip: true,
     blur: 0.4,
+    driftDir: 1,
+    driftDuration: 12,
   },
   {
     id: 'mid',
@@ -55,6 +67,8 @@ const layers: CloudLayer[] = [
     zoom: 1.09,
     flip: false,
     blur: 0.7,
+    driftDir: -1,
+    driftDuration: 16,
   },
   {
     id: 'mid-far',
@@ -65,6 +79,8 @@ const layers: CloudLayer[] = [
     zoom: 1.04,
     flip: true,
     blur: 1.2,
+    driftDir: 1,
+    driftDuration: 21,
   },
   {
     id: 'far',
@@ -75,6 +91,8 @@ const layers: CloudLayer[] = [
     zoom: 1.08,
     flip: false,
     blur: 2,
+    driftDir: -1,
+    driftDuration: 27,
   },
   {
     id: 'horizon',
@@ -85,9 +103,64 @@ const layers: CloudLayer[] = [
     zoom: 1,
     flip: true,
     blur: 2.8,
+    driftDir: 1,
+    driftDuration: 34,
   },
 ]
 
+/* ── Cursor / gyro parallax on the whole cloud bank ──────────────────── */
+const { parallaxX, parallaxY } = useParallax(16, 0.05)
+
+/* ── Scroll-based cloud reveal (large screens only) ──────────────────── */
+const MAX_REVEAL = 140 // px to push the bank below its normal position
+const targetOffset = ref(0)
+const currentOffset = ref(0)
+const isLargeScreen = ref(false)
+let revealRaf = 0
+let mq: MediaQueryList | null = null
+
+function checkScreenSize() {
+  if (!mq) return
+  isLargeScreen.value = mq.matches
+  if (mq.matches) {
+    targetOffset.value = MAX_REVEAL
+    currentOffset.value = MAX_REVEAL
+  } else {
+    targetOffset.value = 0
+    currentOffset.value = 0
+  }
+}
+
+function onWheel(e: WheelEvent) {
+  if (!isLargeScreen.value) return
+  targetOffset.value = Math.max(0, Math.min(MAX_REVEAL, targetOffset.value + e.deltaY * 0.35))
+}
+
+function tickReveal() {
+  currentOffset.value += (targetOffset.value - currentOffset.value) * 0.08
+  revealRaf = requestAnimationFrame(tickReveal)
+}
+
+onMounted(() => {
+  mq = window.matchMedia('(min-width: 1024px)')
+  checkScreenSize()
+  mq.addEventListener('change', checkScreenSize)
+  window.addEventListener('wheel', onWheel, { passive: true })
+  revealRaf = requestAnimationFrame(tickReveal)
+})
+
+onBeforeUnmount(() => {
+  cancelAnimationFrame(revealRaf)
+  mq?.removeEventListener('change', checkScreenSize)
+  window.removeEventListener('wheel', onWheel)
+})
+
+/* ── Combined style for the bank wrapper ─────────────────────────────── */
+const bankStyle = computed(() => ({
+  transform: `translate(${parallaxX.value.toFixed(2)}px, ${(parallaxY.value + currentOffset.value).toFixed(2)}px)`,
+}))
+
+/* ── Per-layer inline styles ─────────────────────────────────────────── */
 function layerStyle(layer: CloudLayer) {
   return {
     zIndex: 20 - layer.index,
@@ -100,12 +173,15 @@ function layerStyle(layer: CloudLayer) {
     '--base-light': layer.light[1],
     '--top-dark': layer.dark[0],
     '--base-dark': layer.dark[1],
+    '--drift-range': `${DRIFT_RANGE}px`,
+    '--drift-dir': layer.driftDir,
+    '--drift-duration': `${layer.driftDuration}s`,
   }
 }
 </script>
 
 <template>
-  <div class="cloud-bank" aria-hidden="true">
+  <div class="cloud-bank" aria-hidden="true" :style="bankStyle">
     <svg
       v-for="layer in layers"
       :key="layer.id"
@@ -134,7 +210,9 @@ function layerStyle(layer: CloudLayer) {
   inset-inline: 0;
   bottom: 0;
   height: 0;
+  z-index: 20;
   pointer-events: none;
+  will-change: transform;
 }
 
 .cloud-layer {
@@ -145,5 +223,21 @@ function layerStyle(layer: CloudLayer) {
   height: auto;
   transform: translateX(calc(-50% + var(--shift))) scaleX(var(--flip));
   filter: blur(var(--blur));
+
+  /* Animation is declared HERE so Vue's scoped CSS compiler can match
+     the @keyframes name to this reference. Previously it was set via
+     inline :style which bypassed scoping and broke the animation. */
+  animation: cloud-drift var(--drift-duration) ease-in-out infinite;
+}
+
+/* Each layer drifts left or right depending on --drift-dir (±1).
+   The translate property composes independently with the transform
+   above, so the positioning transform is unaffected. */
+@keyframes cloud-drift {
+  0%   { translate: 0 0; }
+  25%  { translate: calc(var(--drift-range) * var(--drift-dir)) 0; }
+  50%  { translate: 0 0; }
+  75%  { translate: calc(var(--drift-range) * var(--drift-dir) * -1) 0; }
+  100% { translate: 0 0; }
 }
 </style>
