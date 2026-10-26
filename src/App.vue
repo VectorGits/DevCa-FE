@@ -1,28 +1,58 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import Celestial from './components/Celestial.vue'
 import CloudBank from './components/CloudBank.vue'
-import { useTheme } from './composables/useTheme'
+import GyroPermission from './components/GyroPermission.vue'
+import FloatingHeroTitle from './components/FloatingHeroTitle.vue'
+import InfoModal from './components/InfoModal.vue'
 
-const { isDark, toggleTheme } = useTheme()
+const isInfoOpen = ref(false)
+
+onMounted(() => {
+  try {
+    const hasSeen = localStorage.getItem('devca-seen-theme-hint')
+    if (!hasSeen) {
+      isInfoOpen.value = true
+    }
+  } catch {
+    // In restricted iframe/private storage mode, default to showing
+    isInfoOpen.value = true
+  }
+})
 </script>
 
 <template>
   <main class="sky relative min-h-svh overflow-hidden">
     <Celestial />
     <CloudBank />
+    <GyroPermission />
+    <InfoModal v-model="isInfoOpen" />
 
-    <div class="relative z-30 flex min-h-svh flex-col items-center justify-center gap-8 px-6 text-center">
-      <h1 class="text-4xl font-bold text-[#14121c] sm:text-6xl dark:text-white">
-        Dev Career Frontend Channel
-      </h1>
+    <div class="pointer-events-none relative z-30 flex min-h-svh flex-col items-center justify-center gap-8 px-6 text-center lg:items-start lg:text-left lg:px-16 xl:px-24">
+      <div class="pointer-events-auto">
+        <FloatingHeroTitle />
+      </div>
 
       <button
         type="button"
-        class="rounded-full border border-[#14121c]/20 px-5 py-2 text-sm text-[#14121c] transition-colors hover:bg-[#14121c]/5 dark:border-white/25 dark:text-white dark:hover:bg-white/10"
-        :aria-pressed="isDark"
-        @click="toggleTheme"
+        class="pointer-events-auto group flex h-11 w-11 items-center justify-center rounded-full border border-[#14121c]/20 bg-white/40 text-[#14121c] shadow-sm backdrop-blur-md transition-all duration-200 hover:scale-105 hover:border-[#14121c]/40 hover:bg-white/70 active:scale-95 dark:border-white/25 dark:bg-white/10 dark:text-white dark:hover:border-white/50 dark:hover:bg-white/20"
+        aria-label="Information"
+        title="Information: Click the Sun/Moon to switch themes"
+        @click="isInfoOpen = true"
       >
-        {{ isDark ? 'Dark mode: on' : 'Dark mode: off' }}
+        <svg
+          class="h-5 w-5 transition-transform duration-200 group-hover:rotate-12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
       </button>
     </div>
   </main>

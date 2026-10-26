@@ -78,3 +78,16 @@ html.dark .cloud-layer {
 .cloud-rim {
   stroke: var(--rim);
 }
+
+/* ── Hero title character cloud flicker halo ─────────────────────────── */
+.char-inner {
+  text-shadow:
+    0 0 6px currentColor,
+    0 0 14px rgba(189, 166, 249, 0.35);
+}
+
+html.dark .char-inner {
+  text-shadow:
+    0 0 8px currentColor,
+    0 0 18px rgba(196, 174, 255, 0.45);
+}

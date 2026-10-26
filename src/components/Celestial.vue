@@ -5,7 +5,7 @@ import Sun from './Sun.vue'
 import { useTheme } from '../composables/useTheme'
 import { useParallax } from '../composables/useParallax'
 
-const { isDark } = useTheme()
+const { isDark, toggleTheme } = useTheme()
 const { parallaxX, parallaxY } = useParallax(16, 0.07)
 
 const parallaxStyle = computed(() => ({
@@ -14,14 +14,23 @@ const parallaxStyle = computed(() => ({
 </script>
 
 <template>
-  <div class="celestial" aria-hidden="true" :style="parallaxStyle">
-    <div class="halo" :class="isDark ? 'halo-moon' : 'halo-sun'" />
+  <button
+    type="button"
+    class="celestial"
+    :style="parallaxStyle"
+    :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+    :title="isDark ? 'Click the Moon to switch to light mode' : 'Click the Sun to switch to dark mode'"
+    @click="toggleTheme"
+  >
+    <div class="celestial-inner">
+      <div class="halo" :class="isDark ? 'halo-moon' : 'halo-sun'" />
 
-    <Transition name="swap">
-      <Moon v-if="isDark" key="moon" class="body" />
-      <Sun v-else key="sun" class="body" />
-    </Transition>
-  </div>
+      <Transition name="swap">
+        <Moon v-if="isDark" key="moon" class="body" />
+        <Sun v-else key="sun" class="body" />
+      </Transition>
+    </div>
+  </button>
 </template>
 
 <style scoped>
@@ -36,7 +45,30 @@ const parallaxStyle = computed(() => ({
   width: var(--size);
   aspect-ratio: 1;
   z-index: 5; /* behind the cloud banks (z-index: 20) */
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  border-radius: 9999px;
+}
+
+.celestial-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1), filter 300ms ease;
+}
+
+.celestial:hover .celestial-inner {
+  transform: scale(1.05);
+  filter: brightness(1.08);
+}
+
+.celestial:active .celestial-inner {
+  transform: scale(0.95);
 }
 
 .halo {
