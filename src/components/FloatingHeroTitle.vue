@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
 <template>
   <h1
     ref="headingRef"
-    class="text-3xl min-[420px]:text-4xl font-bold text-[#14121c] sm:text-6xl dark:text-white lg:leading-[1.18] select-none"
+    class="text-[2.5rem] min-[360px]:text-[3rem] min-[420px]:text-[3rem] min-[520px]:text-5xl font-bold text-[#14121c] sm:text-6xl dark:text-white leading-[1.14] lg:leading-[1.18] select-none"
     aria-label="Dev Career Frontend Channel"
   >
     <span
